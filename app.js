@@ -1,22 +1,41 @@
 const request = require("request");
 const chalk = require("chalk");
 
-const lat = "37.8267"
-const lng = "-122.4233"
+const accessToken = "pk.eyJ1Ijoid2N5am95Y2UiLCJhIjoiY2swNXg3NTlpM3B3NDNibXZqaWF0a2dlaiJ9.npfswSTgFPg3uwWzSR0KMg"
 const lang = "zh-tw" || "en";
-const url = `https://api.darksky.net/forecast/c8a501c907394ac466641f19b0986dc6/${lat},${lng}?units=si&lang=${lang}`;
 
 // TODO:
-// - Print a small forecast to the user
+// - Post HTTP request to Dark Sky URL
+// - Get response and parse it as JSON
+// - Print a small forecast to the user based on queried location
 // - Example: "It is currently 58.55 degrees outside. There is a 0% chance of rain."
 
-request({ url, json: true }, (error, response) => {
-  const data = response.body;
+const query = "Hong Kong";
 
-  const tempMessage = lang === "zh-tw" ? "天氣現在" + data.currently.temperature + "度。" : "It is currently " + data.currently.temperature + "º outside. ";
-  const precipMessage = lang === "zh-tw" ? "下雨機率為" + (data.currently.precipProbability * 100) + "%。" : "There is a " + (data.currently.precipProbability * 100) + "% chance of rain.";
+let location = "";
+query.split("").forEach(char => {
+  const letter = char === " " ? "%20" : char;
+  location += letter;
+});
 
-  console.log(chalk.inverse("Selected timezone: " + data.timezone));
-  console.log(tempMessage + precipMessage);
-  console.log(data.daily.summary);
+const geocodingURL = `https://api.mapbox.com/geocoding/v5/mapbox.places/${location}.json?access_token=${accessToken}&limit=1`;
+
+request({ url: geocodingURL, json: true }, (error, response) => {
+  const result = response.body.features[0];
+  const place = result.place_name;
+  const lng = result.center[0];
+  const lat = result.center[1];
+
+  const weatherURL = `https://api.darksky.net/forecast/c8a501c907394ac466641f19b0986dc6/${lat},${lng}?units=si&lang=${lang}`;
+
+  request({ url: weatherURL, json: true }, (error, response) => {
+    const data = response.body;
+
+    const tempMessage = lang === "zh-tw" ? "天氣現在" + data.currently.temperature + "度。" : "It is currently " + data.currently.temperature + "º outside. ";
+    const precipMessage = lang === "zh-tw" ? "下雨機率為" + Math.round(data.currently.precipProbability * 100) + "%。" : "There is a " + (data.currently.precipProbability * 100) + "% chance of rain.";
+
+    console.log(chalk.inverse(`Selected timezone: ${place} (${lat.toFixed(2)}, ${lng.toFixed(2)})`));
+    console.log(tempMessage + precipMessage);
+    console.log(data.daily.summary);
+  })
 });
