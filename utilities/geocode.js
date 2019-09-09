@@ -10,16 +10,16 @@ const geocode = (address, callback) => {
   const accessToken = "pk.eyJ1Ijoid2N5am95Y2UiLCJhIjoiY2swNXg3NTlpM3B3NDNibXZqaWF0a2dlaiJ9.npfswSTgFPg3uwWzSR0KMg"
   const geocodingURL = `https://api.mapbox.com/geocoding/v5/mapbox.places/${location}.json?access_token=${accessToken}&limit=1`;
 
-  request({ url: geocodingURL, json: true }, (error, response) => {
+  request({ url: geocodingURL, json: true }, (error, { body }) => {
     if (error) {
       callback("Unable to connect to weather service.", undefined);
-    } else if (response.body.message === "Forbidden" || response.body.error || response.body.features.length === 0) {
+    } else if (body.message === "Forbidden" || body.error || body.features.length === 0) {
       callback("Unable to find location", undefined);
     } else {
       callback(undefined, {
-        location: response.body.features[0].place_name,
-        lat: response.body.features[0].center[0],
-        lng: response.body.features[0].center[1]
+        location: body.features[0].place_name,
+        lat: body.features[0].center[0],
+        lng: body.features[0].center[1]
       });
     };
   });

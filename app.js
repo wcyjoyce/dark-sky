@@ -10,17 +10,17 @@ const query = process.argv[2];
 if (!query) {
   console.log("Please provide a location.")
 } else {
-  geocode(query, (error, data) => {
+  geocode(query, (error, { lng, lat, location }) => {
     if (error) {
       return console.log(error);
     };
 
-    forecast(data.lng, data.lat, (error, forecastData) => {
+    forecast(lng, lat, (error, forecastData) => {
       if (error) {
         return console.log(error);
       };
 
-      console.log("Location: ", data.location);
+      console.log("Location: ", location);
       console.log("Forecast: ", forecastData);
     });
   });
