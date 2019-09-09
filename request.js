@@ -20,13 +20,13 @@ query.split("").forEach(char => {
 
 const geocodingURL = `https://api.mapbox.com/geocoding/v5/mapbox.places/${location}.json?access_token=${accessToken}&limit=1`;
 
-request({ url: geocodingURL, json: true }, (error, response) => {
+request({ url: geocodingURL, json: true }, (error, { body }) => {
   if (error) {
     console.log("Unable to connect to weather service.");
-  } else if (response.body.message === "Forbidden" || response.body.error || response.body.features.length === 0) {
+  } else if (body.message === "Forbidden" || body.error || body.features.length === 0) {
     console.log("Unable to find location.")
   } else {
-    const result = response.body.features[0];
+    const result = body.features[0];
     const place = result.place_name;
     const lng = result.center[0];
     const lat = result.center[1];
@@ -36,8 +36,9 @@ request({ url: geocodingURL, json: true }, (error, response) => {
     request({ url: weatherURL, json: true }, (error, response) => {
       const data = response.body;
 
-      const tempMessage = lang === "zh-tw" ? "天氣現在" + data.currently.temperature + "度。" : "It is currently " + data.currently.temperature + "º outside. ";
-      const precipMessage = lang === "zh-tw" ? "下雨機率為" + Math.round(data.currently.precipProbability * 100) + "%。" : "There is a " + Math.round(data.currently.precipProbability * 100) + "% chance of rain.";
+      const { temperature, precipProbability } = data.currently;
+      const tempMessage = lang === "zh-tw" ? "天氣現在" + temperature + "度。" : "It is currently " + temperature + "º outside. ";
+      const precipMessage = lang === "zh-tw" ? "下雨機率為" + Math.round(precipProbability * 100) + "%。" : "There is a " + Math.round(precipProbability * 100) + "% chance of rain.";
 
       console.log(chalk.inverse(`Selected timezone: ${place} (${lat.toFixed(2)}, ${lng.toFixed(2)})`));
       console.log(tempMessage + precipMessage);
