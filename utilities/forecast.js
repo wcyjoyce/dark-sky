@@ -16,25 +16,25 @@ const forecast = (lat, lng, callback) => {
     } else if (response.body.error) {
       callback("Unable to find location", undefined)
     } else {
-      callback(undefined, {
-        timezone: response.body.timezone,
-        temperature: response.body.currently.temperature,
-        precipProbability: response.body.currently.precipProbability,
-        forecast: response.body.daily.summary
-      });
+      const tempMessage = "It is currently " + response.body.currently.temperature + "º outside. ";
+      const precipMessage = "There is a " + Math.round(response.body.currently.precipProbability * 100) + "% chance of rain.";
+
+      callback(undefined, tempMessage + precipMessage);
     };
   });
 };
 
-// #1: success
-forecast(37.8267, -112, (error, data) => {
-  console.log("Error: ", error);
-  console.log("Data: ", data);
-});
+module.exports = forecast;
 
-// #2: invalid location
-forecast(-122.4233, 37.826, (error, data) => {
-  console.log("Error: ", error);
-  console.log("Data: ", data);
-});
+// // #1: success
+// forecast(37.8267, -112, (error, data) => {
+//   console.log("Error: ", error);
+//   console.log("Data: ", data);
+// });
+
+// // #2: invalid location
+// forecast(-122.4233, 37.826, (error, data) => {
+//   console.log("Error: ", error);
+//   console.log("Data: ", data);
+// });
 
