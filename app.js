@@ -1,9 +1,9 @@
 const geocode = require("./utilities/geocode.js");
 const forecast = require("./utilities/forecast.js");
 
-//////////
+const query = process.argv[2];
 
-geocode("Boston", (error, data) => {
+geocode(query, (error, data) => {
   if (error) {
     return console.log(error);
   };
